@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Static HTML/JavaScript implementation of a complementary 5-year cardiovascular disease risk calculator using complete blood count markers." />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Complementary 5-Year CVD Risk Calculator</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <noscript>
+    <div class="noscript">
+      This calculator requires JavaScript. Please enable JavaScript in your browser.
+    </div>
+  </noscript>
+
+  <header class="topbar" aria-label="Application header">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">CBC</div>
+        <div>
+          <div class="brand-title">Complementary 5-Year CVD Risk Calculator</div>
+          <div class="brand-subtitle">Age + complete blood count markers for EHR-oriented risk assessment</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="copyResultBtn" type="button">Copy result</button>
+        <button class="btn btn-ghost" id="printBtn" type="button">Print / Save PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page-grid" id="app">
+    <section class="panel input-panel" aria-labelledby="patient-profile-title">
+      <div class="section-kicker">Current input</div>
+      <h1 id="patient-profile-title">Patient profile</h1>
+      <p class="muted small">
+        Enter routinely available examination data. Model 2 requires only age, WBC, RBC, and HRR.
+      </p>
+
+      <form id="calculatorForm" autocomplete="off">
+        <fieldset class="field-group">
+          <legend>Sex</legend>
+          <div class="segmented" role="radiogroup" aria-label="Sex">
+            <label class="segment">
+              <input type="radio" name="sex" value="Female" checked />
+              <span>Female</span>
+            </label>
+            <label class="segment">
+              <input type="radio" name="sex" value="Male" />
+              <span>Male</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="input-grid">
+          <label class="field">
+            <span>Age <em>years</em></span>
+            <input id="age" name="age" type="number" min="40" max="79" step="1" inputmode="decimal" required />
+          </label>
+
+          <label class="field">
+            <span>WBC <em>×10⁹/L</em></span>
+            <input id="wbc" name="wbc" type="number" min="2" max="15" step="0.01" inputmode="decimal" required />
+          </label>
+
+          <label class="field">
+            <span>RBC <em>×10¹²/L</em></span>
+            <input id="rbc" name="rbc" type="number" min="3" max="6" step="0.01" inputmode="decimal" required />
+          </label>
+
+          <label class="field">
+            <span>HRR <em>ratio</em></span>
+            <input id="hrr" name="hrr" type="number" min="7" max="16" step="0.01" inputmode="decimal" required />
+          </label>
+
+          <label class="field optional-field">
+            <span>BMI <em>kg/m²</em></span>
+            <input id="bmi" name="bmi" type="number" min="10" max="60" step="0.1" inputmode="decimal" />
+          </label>
+
+          <label class="field optional-field">
+            <span>SBP <em>mmHg</em></span>
+            <input id="sbp" name="sbp" type="number" min="60" max="260" step="1" inputmode="decimal" />
+          </label>
+        </div>
+
+        <label class="field optional-field full-width">
+          <span>Smoking status <em>required only for WHO / Model 3 comparison</em></span>
+          <select id="smoking" name="smoking">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </label>
+
+        <div class="button-row">
+          <button class="btn" id="femaleDemoBtn" type="button">Female demo</button>
+          <button class="btn" id="maleDemoBtn" type="button">Male demo</button>
+          <button class="btn btn-primary" id="resetBtn" type="button">Reset</button>
+        </div>
+      </form>
+
+      <div class="case-card" aria-live="polite">
+        <div class="section-kicker">Case summary</div>
+        <div id="caseSummary" class="case-summary">—</div>
+      </div>
+
+      <div class="note-card">
+        <strong>Risk bands:</strong> low &lt; 2.5%, borderline 2.5% to &lt; 5.0%, high ≥ 5.0%.
+      </div>
+    </section>
+
+    <section class="output-stack" aria-labelledby="results-title">
+      <section class="panel hero-panel" aria-labelledby="results-title">
+        <div class="section-kicker">Primary output</div>
+        <h2 id="results-title">Model 2 Cox risk result</h2>
+        <p class="muted">
+          Primary CBC model: age + white blood cell count + red blood cell count + haemoglobin-to-red-cell-distribution-width ratio.
+        </p>
+
+        <div class="primary-result">
+          <div>
+            <div class="model-label">5-year absolute CVD risk</div>
+            <div id="model2Risk" class="risk-number">—</div>
+            <div id="model2Badge" class="badge badge-na">Unavailable</div>
+          </div>
+          <div class="gauge-wrap" aria-hidden="true">
+            <svg class="gauge" viewBox="0 0 180 100" role="img">
+              <path class="gauge-track" d="M20 90 A70 70 0 0 1 160 90" />
+              <path class="gauge-fill" id="model2Gauge" d="M20 90 A70 70 0 0 1 20 90" />
+              <circle id="model2Needle" class="gauge-dot" cx="20" cy="90" r="5" />
+            </svg>
+            <div class="gauge-labels"><span>0%</span><span>10%+</span></div>
+          </div>
+        </div>
+
+        <div class="interpretation-card">
+          <div class="section-kicker">Interpretation</div>
+          <div id="interpretationTitle" class="interpretation-title">—</div>
+          <p id="interpretationText" class="muted">—</p>
+        </div>
+      </section>
+
+      <section class="panel comparison-panel" aria-labelledby="comparison-title" id="comparisonSection">
+        <div class="comparison-header">
+          <div>
+            <div class="section-kicker">Optional comparison</div>
+            <h2 id="comparison-title">Side-by-side model outputs</h2>
+          </div>
+          <label class="toggle">
+            <input id="comparisonToggle" type="checkbox" checked />
+            <span>Show</span>
+          </label>
+        </div>
+
+        <div class="comparison-grid" id="comparisonGrid">
+          <article class="result-card" id="whoCard">
+            <div class="section-kicker">WHO</div>
+            <h3>WHO East Asia, recalibrated</h3>
+            <div class="card-subtitle">Age + smoking + BMI + SBP</div>
+            <div class="card-risk" id="whoRisk">—</div>
+            <div id="whoBadge" class="badge badge-na">Unavailable</div>
+            <div class="card-status" id="whoStatus">—</div>
+          </article>
+
+          <article class="result-card emphasized" id="model2Card">
+            <div class="section-kicker">Model 2</div>
+            <h3>Primary CBC Cox model</h3>
+            <div class="card-subtitle">Age + WBC + RBC + HRR</div>
+            <div class="card-risk" id="model2RiskSmall">—</div>
+            <div id="model2BadgeSmall" class="badge badge-na">Unavailable</div>
+            <div class="card-status" id="model2Status">—</div>
+          </article>
+
+          <article class="result-card" id="model3Card">
+            <div class="section-kicker">Model 3</div>
+            <h3>Integrated Cox model</h3>
+            <div class="card-subtitle">Age + smoking + BMI + SBP + WBC + RBC + HRR</div>
+            <div class="card-risk" id="model3Risk">—</div>
+            <div id="model3Badge" class="badge badge-na">Unavailable</div>
+            <div class="card-status" id="model3Status">—</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel technical-panel" aria-labelledby="technical-title">
+        <button class="accordion-button" id="technicalToggle" type="button" aria-expanded="false" aria-controls="technicalBody">
+          <span id="technical-title">Technical notes</span>
+          <span aria-hidden="true">+</span>
+        </button>
+        <div class="accordion-body" id="technicalBody" hidden>
+          <ul>
+            <li>This static application performs all calculations locally in the browser. No patient-level data are uploaded to a server.</li>
+            <li>Model 2 uses the thesis-derived sex-specific Cox coefficients and 5-year baseline survival implemented in the current Streamlit package.</li>
+            <li>WBC and HRR normalization parameters follow the current deployment package: mean approximated by median and SD approximated by IQR/1.349 where original mean/SD are not available.</li>
+            <li>WHO and Model 3 outputs are retained as optional comparison modules. Before using Model 3 as a primary published calculator, verify the exact sex-specific Model 3 baseline survival.</li>
+            <li>This tool is intended for research and implementation demonstration only. It does not replace clinical judgement.</li>
+          </ul>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span>Static HTML/JavaScript version · no backend server required</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/model-parameters.js"></script>
+  <script src="assets/js/calculator.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -194,9 +194,8 @@
         <div class="accordion-body" id="technicalBody" hidden>
           <ul>
             <li>This static application performs all calculations locally in the browser. No patient-level data are uploaded to a server.</li>
-            <li>Model 2 uses the thesis-derived sex-specific Cox coefficients and 5-year baseline survival implemented in the current Streamlit package.</li>
-            <li>WBC and HRR normalization parameters follow the current deployment package: mean approximated by median and SD approximated by IQR/1.349 where original mean/SD are not available.</li>
-            <li>WHO and Model 3 outputs are retained as optional comparison modules. Before using Model 3 as a primary published calculator, verify the exact sex-specific Model 3 baseline survival.</li>
+            <li>Model 2 uses sex-specific Cox coefficients and 5-year baseline survival derived from the thesis analysis.</li>
+            <li>WBC and HRR normalization parameters use median-based approximations where original mean and standard deviation are not available.</li>
             <li>This tool is intended for research and implementation demonstration only. It does not replace clinical judgement.</li>
           </ul>
         </div>

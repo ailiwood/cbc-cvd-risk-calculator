@@ -1,6 +1,6 @@
-/*
+/* 
  * Model constants for the static CBC-CVD risk calculator.
- * Values are ported from the current Streamlit deployment package.
+ * Values are derived from the thesis analysis and used by the static front-end implementation.
  */
 
 window.CBC_CVD_CONFIG = {

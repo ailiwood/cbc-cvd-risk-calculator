@@ -1,6 +1,6 @@
 # Model validation examples
 
-These examples are used to check whether the JavaScript implementation matches the current Streamlit package logic.
+These examples are used to check whether the JavaScript implementation returns the expected Model 2 Cox risk estimates.
 
 ## Female demo case
 
